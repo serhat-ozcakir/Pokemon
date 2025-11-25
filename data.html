@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="card-title">
+        <div class="card-title-key">speed</div>
+        <div class="card-title-value">50</div>
+    </div>
+    <div class="card-title">
+        <div class="card-title-key">speed</div>
+        <div class="card-title-value">50</div>
+    </div>
+    <div class="card-title">
+        <div class="card-title-key">speed</div>
+        <div class="card-title-value">50</div>
+    </div>
+    <div class="card-title">
+        <div class="card-title-key">speed</div>
+        <div class="card-title-value">50</div>
+    </div>
+   
+</body>
+</html>
+
+  <div class="card-title">
+            <div class="card-title-key">Species:</div>
+            <div class="card-title-value">${data.species.name[0].toUpperCase() + data.species.name.slice(1)}</div>
+        </div>
+         <div class="card-title">
+            <div class="card-title-key">Weight:</div>
+            <div class="card-title-value">${data.weight} kg</div>
+        </div>
+        <div class="card-title">
+            <div class="card-title-key">Height:</div>
+            <div class="card-title-value">${data.height} m</div>
+        </div>
+        <div class="card-title">
+            <div class="card-title-key">Abilities:</div>
+            <div class="card-title-value">${data.abilities.map(item=>item.ability.name[0].toUpperCase() + item.ability.name.slice(1))}</div>
+        </div>      
