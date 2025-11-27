@@ -24,16 +24,18 @@
             <div class="row row-form">
                 <div class="col-12 text-center">
                     <form class="d-flex" role="search">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+                        <input id="input" class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
+                         <button onclick="handlesearch()" class="btn btn-success" type="submit">Search</button>
                     </form>
                 </div>
             </div>
-
         </div>
     </nav>
     <main class="main">
-
-
+        <div id="loading" class="d-flex align-items-center gap-2 loading-div loading-spinner">
+            <div class="spinner-border" role="status"></div>
+            <span class="visual">Loading...</span>
+        </div>
         <div class="modal fade" id="staticBackdrop" tabindex="-1" aria-labelledby="exampleModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
