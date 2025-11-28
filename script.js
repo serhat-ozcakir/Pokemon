@@ -65,16 +65,25 @@ function getColor(type) {
 }
 
 let visibleCount = 20;
-async function PokemonData() {
+async function PokemonData(word) {
     const pokemonCard = document.getElementById("pokemoncard");
     spinnerLoad();
+    // console.log(word);
     pokemonCard.innerHTML = ""; 
+
+    const searchWord = word ? word.trim().toLowerCase() : "";
+
     for (let index = 0; index < visibleCount; index++) {
         const url = urls[index];
         const response = await fetch(url);
         const data = await response.json();
         const bgColor = getColor(data.types[0].type.name);
         pokemonCard.style.animationDelay = `${index * 0.015}s`; 
+        const pokemonName = data.name.trim().toLowerCase();
+
+        if (searchWord && !pokemonName.includes(searchWord)) {
+            continue;
+        } 
         pokemonCard.innerHTML += `
             <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 col-xl-2  mt-5 card-mobil fade-in">
                 <div class="card">
@@ -94,18 +103,30 @@ async function PokemonData() {
                 </div>
             </div>
         `;
+
+       
     }
     await new Promise(resolve => setTimeout(resolve, 500))
     diableSpinnerLoad()
     
 }
 
-function handlesearch(){
-    const input = document.getElementById('input').value.trim();
+function handleSearch(){
+    const input = document.getElementById('input').value.trim().toLowerCase();
+    const alertContainer = document.getElementById('alert-container');
+    if(!input){
+        alertContainer.innerHTML = `
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong>Heey user!</strong>Please enter a valid name
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+        `
+        return
+    }
     console.log(input);
-    
+    PokemonData(input)
 }
-handlesearch()
+
 
 function spinnerLoad(){
     loadingSpinner.classList.remove('loading-spinner');
@@ -223,32 +244,37 @@ function modalShiniy(id){
      console.log(`${id} tiklandi`);
     response.then(res => res.json()).then(data => {
      modalBodyID.innerHTML = `
-        <div class="card-title card-image mb-1">
+        <div class="card-title card-image mb-1 d-flex justify-content-center">
         <img src="${data.sprites.front_shiny}" alt="${data.name}"/>
+        <img src="${data.sprites.back_shiny}" alt="${data.name}"/>
         </div>`;
     })
 }
 
 function nextPokemonCard(id){
     console.log(`${id} tiklandi`);
-    if(id < 40){
-        const nexIdNumber = id + 1;
-        let response = fetch(`https://pokeapi.co/api/v2/pokemon/${nexIdNumber}`);
-        response.then(response=> response.json()).then(data=>{
-            const nextColor = getColor(data.types[0].type.name);
-            openDialog(nexIdNumber,nextColor);
-        })
+    let nexIdNumber = id + 1
+    if(nexIdNumber >= visibleCount){
+        nexIdNumber = 1
     }
+     fetch(`https://pokeapi.co/api/v2/pokemon/${nexIdNumber}`)
+        .then(response => response.json())
+        .then(data => {
+            const backColor = getColor(data.types[0].type.name);
+            openDialog(nexIdNumber, backColor);
+        });
 }
 
 function backPokemonCard(id){
     console.log(`${id} tiklandi`);
-    if(id > 1){
-        const backIdNummer = id - 1;
-        let response = fetch(`https://pokeapi.co/api/v2/pokemon/${backIdNummer}`);
-        response.then(response=> response.json()).then(data=>{
-            const backColor = getColor(data.types[0].type.name);
-            openDialog(backIdNummer,backColor);
-        })
+    let backIdNummer = id - 1;
+    if(backIdNummer < 1){
+        backIdNummer = visibleCount;
     }
+     fetch(`https://pokeapi.co/api/v2/pokemon/${backIdNummer}`)
+        .then(response => response.json())
+        .then(data => {
+            const backColor = getColor(data.types[0].type.name);
+            openDialog(backIdNummer, backColor);
+        });
 }
