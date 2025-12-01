@@ -54,8 +54,25 @@ body {
     border: none;
 }
 
+.card-gif{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 100px;
+}
+
+.image-gif{
+    border-radius: 30px;
+}
+
+.card-gif-text{
+    font-size: 30px;
+    margin-top: 20px;
+}
+
 .card-img-top{
      transition: transform 0.3s ease;
+     
 }
 
 .card-img-top:hover{

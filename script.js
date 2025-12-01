@@ -47,8 +47,6 @@ window.addEventListener('load', () => {
    PokemonData();
 });
 
-
-
 function getColor(type) {
     switch (type) {
         case "grass": return "#78C850";
@@ -60,30 +58,46 @@ function getColor(type) {
         case "ground": return "#E0C068";
         case "fairy": return "#EE99AC";
         case "normal": return "#A8A878";
+        case "psychic": return "#F85888";
+        case "ice": return "#98D8D8";
+        case "dragon": return "#7038F8";
+        case "fighting": return "#C03028";
+        case "rock": return "#B8A038";
+        case "dark": return "#705848";
         default: return "gray";
     }
 }
-
+const cache = {};
 let visibleCount = 20;
+
+async function CacheData(url) {
+if (cache[url]){
+    return cache[url];
+} 
+const response = await fetch(url);
+const data = await response.json();
+cache[url] = data;
+return data;
+}
+
+
 async function PokemonData(word) {
     const pokemonCard = document.getElementById("pokemoncard");
     spinnerLoad();
-    // console.log(word);
     pokemonCard.innerHTML = ""; 
-
     const searchWord = word ? word.trim().toLowerCase() : "";
-
+    let foundPokemon = false;
     for (let index = 0; index < visibleCount; index++) {
         const url = urls[index];
-        const response = await fetch(url);
-        const data = await response.json();
+        const data = await CacheData(url);
         const bgColor = getColor(data.types[0].type.name);
         pokemonCard.style.animationDelay = `${index * 0.015}s`; 
         const pokemonName = data.name.trim().toLowerCase();
 
-        if (searchWord && !pokemonName.includes(searchWord)) {
-            continue;
-        } 
+    if (!pokemonName.startsWith(searchWord)){
+         continue;
+         }
+        foundPokemon = true;
         pokemonCard.innerHTML += `
             <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 col-xl-2  mt-5 card-mobil fade-in">
                 <div class="card">
@@ -97,14 +111,20 @@ async function PokemonData(word) {
                         ${data.types.map(item => `
                             <button class="btn btn-sm text-white mx-1" style="background-color: ${bgColor};">
                                 ${item.type.name}
-                            </button>`).join("")}
-                        <img src="${data.sprites.other.home.front_default}" class="card-img-top" alt="${data.name}">
+                            </button>`)}
+                        <img loading="lazy" src="${data.sprites.other.home.front_default}" class="card-img-top" alt="${data.name}">
                     </div>
                 </div>
             </div>
-        `;
-
-       
+        `;       
+    }
+    if (!foundPokemon){ 
+        pokemonCard.innerHTML = `
+        <div class="card-gif"> 
+            <img class="image-gif" src="./img/no-pikachu.gif" alt="">
+            <p class="text-light card-gif-text">The Pokémon you are looking for could not be found. "${searchWord}"</p>
+        </div>` 
+        document.getElementById('loadbutton').style.display = "none";
     }
     await new Promise(resolve => setTimeout(resolve, 500))
     diableSpinnerLoad()
@@ -123,8 +143,10 @@ function handleSearch(){
         `
         return
     }
+   
     console.log(input);
     PokemonData(input)
+    //document.getElementById('input').value="";
 }
 
 
@@ -154,53 +176,49 @@ async function loadCard() {
 }
 
 let modalShow = null;
-function openDialog(id,bgColor) {
-      const modalElement = document.getElementById('staticBackdrop');
-      const modalBodyID = document.getElementById('modalBodyID');
-      const modalHeder = document.getElementById('modalHeader');
-      const modalBodyInfo = document.getElementById('modal-body-info');
-      const modalFooter =  document.getElementById('modal-footer');
-      modalHeder.style.backgroundColor = bgColor;
-    if (!modalShow) {
-      modalShow = new bootstrap.Modal(modalElement, { backdrop: true, keyboard: true });
-    }
+    async function openDialog(id, bgColor) {
+    const modalElement = document.getElementById('staticBackdrop');
+    const modalHeader = document.getElementById('modalHeader');
+    const modalBodyInfo = document.getElementById('modal-body-info');
+    const modalBodyID = document.getElementById('modalBodyID');
+    const modalFooter = document.getElementById('modal-footer');
+
+    if (!modalShow) modalShow = new bootstrap.Modal(modalElement, { backdrop: true, keyboard: true });
     modalShow.show();
-    let response = fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-    response.then(res => res.json()).then(data => {
-        console.log(data);
-        modalHeder.innerHTML = `
+
+    const data = await CacheData(`https://pokeapi.co/api/v2/pokemon/${id}`);
+
+    modalHeader.style.backgroundColor = bgColor;
+    modalHeader.innerHTML = `
         <div class="card-body modal-card-header">
             <h5 class="card-title text-capitalize">#${data.id}</h5>
             <h5 class="card-title text-capitalize">${data.name}</h5>
         </div>
         <div class="card-body modal-card-main mt-3">
             <div class="card-body modal-card-button mt-2">
-                    ${data.types.map(item => {
-                    const bgColor = getColor(data.types[0].type.name);
-                    return `<button class="btn btn-sm text-white mx-1 mb-2" style="background-color: ${bgColor};">${item.type.name}</button>
-                    `;
-                     }).join("")}
+                ${data.types.map(item => {
+                    const color = getColor(item.type.name);
+                    return `<button class="btn btn-sm text-white mx-1 mb-2" style="background-color:${color}">${item.type.name}</button>`;
+                }).join('')}
             </div>
-            <img src="${data.sprites.other?.showdown?.front_shiny 
-                 || data.sprites.other?.home?.front_default 
-                 || data.sprites.front_default}" class="card-img-top modal-image" alt="${data.name}">
-        </div>
-        
-        `;
-        modalBodyInfo.innerHTML = `
-                <a style="color: ${bgColor};" onclick="modalAbout(${data.id})">About</a><a style="color: ${bgColor};" onclick="modalBaseStats(${data.id})">Base Stats</a><a style="color: ${bgColor}" onclick="modalShiniy(${data.id})">Shiny</a>
-        `;
-        modalFooter.innerHTML = `
-            <button onclick="backPokemonCard(${data.id})" style="color: ${bgColor};" type="button" class="btn"><i class="bi bi-arrow-left-circle icon"></i></button>
-            <button onclick="nextPokemonCard(${data.id})" style="color: ${bgColor};" type="button" class="btn"><i class="bi bi-arrow-right-circle icon"></i></button>
-        `;
-    });
-   modalAbout(id)    
+            <img src="${data.sprites.other?.home?.front_default}" class="card-img-top modal-image" alt="${data.name}">
+        </div>`;
+
+    modalBodyInfo.innerHTML = `
+        <a style="color:${bgColor}" onclick="modalAbout(${data.id})">About</a>
+        <a style="color:${bgColor}" onclick="modalBaseStats(${data.id})">Base Stats</a>
+        <a style="color:${bgColor}" onclick="modalShiniy(${data.id})">Shiny</a>`;
+
+    modalFooter.innerHTML = `
+        <button onclick="backPokemonCard(${data.id})" style="color:${bgColor}" type="button" class="btn"><i class="bi bi-arrow-left-circle icon"></i></button>
+        <button onclick="nextPokemonCard(${data.id})" style="color:${bgColor}" type="button" class="btn"><i class="bi bi-arrow-right-circle icon"></i></button>`;
+
+    modalAbout(id);
 }
 
-function modalAbout(id){
-    let response = fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-    response.then(res => res.json()).then(data => {
+
+async function modalAbout(id){
+    const data = await CacheData(`https://pokeapi.co/api/v2/pokemon/${id}`);
       modalBodyID.innerHTML = `
         <div class="card-title mb-1">
             <div class="card-title-key">Species</div>
@@ -219,13 +237,12 @@ function modalAbout(id){
             <div class="card-title-value">: ${data.abilities.map(item=>item.ability.name[0].toUpperCase() + item.ability.name.slice(1))}</div>
         </div>      
         `;
-})
+
 }
 
-function modalBaseStats(id){
-    let response = fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+async function modalBaseStats(id){
     console.log(`${id} tiklandi`);
-    response.then(res => res.json()).then(data => {
+const data = await CacheData(`https://pokeapi.co/api/v2/pokemon/${id}`);
     modalBodyID.innerHTML = `
          ${data.stats.map(item => `
     <div class="card-title mb-1">
@@ -237,44 +254,31 @@ function modalBaseStats(id){
     </div>
     `).join('')}
         `;
-    })
+   
 }
-function modalShiniy(id){
-     let response = fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-     console.log(`${id} tiklandi`);
-    response.then(res => res.json()).then(data => {
+async function modalShiniy(id){
+    console.log(`${id} tiklandi`);
+const data = await CacheData(`https://pokeapi.co/api/v2/pokemon/${id}`);
      modalBodyID.innerHTML = `
         <div class="card-title card-image mb-1 d-flex justify-content-center">
         <img src="${data.sprites.front_shiny}" alt="${data.name}"/>
         <img src="${data.sprites.back_shiny}" alt="${data.name}"/>
         </div>`;
-    })
+   
 }
 
-function nextPokemonCard(id){
-    console.log(`${id} tiklandi`);
-    let nexIdNumber = id + 1
-    if(nexIdNumber >= visibleCount){
-        nexIdNumber = 1
-    }
-     fetch(`https://pokeapi.co/api/v2/pokemon/${nexIdNumber}`)
-        .then(response => response.json())
-        .then(data => {
-            const backColor = getColor(data.types[0].type.name);
-            openDialog(nexIdNumber, backColor);
-        });
-}
+ async function nextPokemonCard(id) {
+     let nextId = id + 1;
+      if (nextId > urls.length){
+        nextId = 1;
+      }
+    const data = await CacheData(`https://pokeapi.co/api/v2/pokemon/${nextId}`);
+     openDialog(nextId, getColor(data.types[0].type.name)); }
 
-function backPokemonCard(id){
-    console.log(`${id} tiklandi`);
-    let backIdNummer = id - 1;
-    if(backIdNummer < 1){
-        backIdNummer = visibleCount;
+ async function backPokemonCard (id) {
+     let backId = id - 1; 
+    if (backId < 1){
+        backId = urls.length;
     }
-     fetch(`https://pokeapi.co/api/v2/pokemon/${backIdNummer}`)
-        .then(response => response.json())
-        .then(data => {
-            const backColor = getColor(data.types[0].type.name);
-            openDialog(backIdNummer, backColor);
-        });
-}
+    const data = await CacheData(`https://pokeapi.co/api/v2/pokemon/${backId}`); openDialog(backId, getColor(data.types[0].type.name));
+ }
