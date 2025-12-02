@@ -20,12 +20,15 @@ body {
 
 .navbar{
     background-color: #FF3E3E;
+    box-shadow: 6px 6px 6px 6px #484545;
 }
 
 .navbar-container{
     display: flex;
     justify-content: center;
     flex-direction: column;
+    max-width: 1440px;
+    width: 100%;
 }
 
 .navbar-image{
@@ -46,6 +49,17 @@ body {
     min-height: calc(100vh - 200px);
     padding: 20px 0;
     background-color:#1E90FF ;
+}
+
+.form-control{
+    border-top-right-radius:0px ;
+    border-bottom-right-radius: 0px;
+}
+
+
+.form-button{
+    border-top-left-radius:0px ;
+    border-bottom-left-radius: 0px;
 }
 
 .card{
@@ -191,6 +205,11 @@ body {
     background-color: #FF3E3E;
 }
 
+.footer-container{
+    max-width: 1440px;
+    width: 100%;
+}
+
 .footer-image{
     max-width: 200px;
     width: 100%;
@@ -236,6 +255,12 @@ body {
     transform: translateY(20px);
     animation: fadeInUp 0.4s forwards;
 }
+
+#loadbutton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 
 @keyframes fadeInUp {
     to {
