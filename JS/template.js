@@ -103,7 +103,7 @@ function templateModalBaseStats(data){
             <div class="card-title-key">${item.stat.name[0].toUpperCase() + item.stat.name.slice(1)}</div>
             <div class="card-title-value">: ${item.base_stat}</div>
             <div class="progress" role="progressbar" aria-label="Success example"  aria-valuenow="" aria-valuemin="" aria-valuemax="100">
-            <div class="progress-bar bg-${item.base_stat > 60 ? 'success' : 'danger'}" style="width:${item.base_stat}%"></div>
+            <div class="progress-bar bg-${item.base_stat >= 55 ? 'success' : 'danger'}" style="width:${item.base_stat}%"></div>
             </div>
         </div>`).join('')}
         `;
