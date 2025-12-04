@@ -21,17 +21,9 @@ function tempalteNoFound(searchWord){
         <div class="card-gif">
             <img class="image-gif" src="./img/no-pikachu.gif" alt="">
             <p class="text-light card-gif-text">
-                The Pokémon you are looking for could not be found. "${searchWord}"
+                The Pokémon "${searchWord}" you are looking for could not be found. 
             </p>
         </div>`;
-}
-
-function templateHandleSearch(){
-    return  `
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <strong>Heey user!</strong> You must write at least 3 characters.
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>`
 }
 
 function templateModalHeader(data){

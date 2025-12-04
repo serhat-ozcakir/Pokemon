@@ -34,16 +34,17 @@ const searchCache = {};
 async function CacheData(url) {
     if (cache[url]){
         return cache[url];
+    } else{
+        const response = await fetch(url);
+        const data = await response.json();
+        cache[url] = data;
+        return data; 
     } 
-    const response = await fetch(url);
-    const data = await response.json();
-    cache[url] = data;
-    return data;
 }
 
 async function PokemonListData(searchWord) {
     const listUrl = searchWord
-        ? "https://pokeapi.co/api/v2/pokemon?limit=1000&offset=0"
+        ? "https://pokeapi.co/api/v2/pokemon?limit=500&offset=0"
         : `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`;
 
     if (searchCache[listUrl]){
@@ -70,10 +71,8 @@ async function renderPokemonData(word = ""){
     await filterPokemonList(matchedPokemonList, pokemonCard);
     if (!searchWord) offset += limit;
     await buttonDisplayControl(searchWord, matchedPokemonList.length > 0, pokemonCard);
-    if (searchWord) {
-        setTimeout(() => diableSpinnerLoad(), 500);
-    } else {
-        diableSpinnerLoad(); }
+    if (searchWord) {setTimeout(() => diableSpinnerLoad(), 500);}
+    else {diableSpinnerLoad();}
 }
 
 function filterPokemonName(list, searchWord) {
@@ -98,7 +97,9 @@ function handleSearch(){
     const input = document.getElementById('input').value.trim().toLowerCase();
     const alertContainer = document.getElementById('alert-container');
     if(!input || input.length < 3){
-        alertContainer.innerHTML = templateHandleSearch()
+    const toastElement = document.getElementById('orderToast');
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
         return;
     } 
     renderPokemonData(input);
