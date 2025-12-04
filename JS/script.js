@@ -66,6 +66,7 @@ async function PokemonListData(searchWord) {
 }
 
 async function renderPokemonData(word = ""){
+    pokemonCard.innerHTML = "";
     spinnerLoad();
     const searchWord = word ? word.trim().toLowerCase() : "";
     if (word){
@@ -108,7 +109,17 @@ function handleSearch(){
         return;
     } 
     renderPokemonData(input);
+  
 }
+
+const inputEl = document.getElementById('input');
+inputEl.addEventListener('input', () => {
+    if (inputEl.value.trim() === "") {
+        renderPokemonData(null); 
+    }
+});
+
+
 
 async function buttonDisplayControl(searchWord,foundPokemon,pokemonCard) {
     if (!foundPokemon) {
