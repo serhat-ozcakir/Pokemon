@@ -5,7 +5,9 @@ body {
   padding: 0;
   box-sizing: border-box;
   overflow-x: hidden;
+  scroll-behavior: smooth !important;
 }
+
 
 .alert-position {
     position: fixed;
@@ -261,9 +263,19 @@ body {
     animation: fadeInUp 0.4s forwards;
 }
 
+.up-icon{
+    font-size: 40px;
+    color: rgb(245, 241, 5);
+    padding: 40px;
+}
+
 #loadbutton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.btn-close{
+    color: black !important;
 }
 
 @keyframes fadeInUp {
@@ -272,6 +284,13 @@ body {
         transform: translateY(0);
     }
 }
+
+@media screen and (max-width:1200px){
+    .up-icon{
+        padding: 20px;
+    }
+}
+
 
 @media screen and (max-width:578px) {
     .card-mobil{
@@ -296,5 +315,18 @@ body {
     .modal-footer{
         padding: 0px;
     }
-    
+}
+
+@media screen and (max-width:420px){
+    .up-icon{
+        padding: 10px;
+        font-size: 30px;
+    }
+}
+
+@media screen and (max-width:370px) {
+  .toast {
+    max-width: 300px !important;
+    width: 100%;
+  }
 }
