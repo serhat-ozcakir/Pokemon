@@ -67,8 +67,8 @@ function colorActive(item, id, bgColor){
 
 function tempalteModalFooter(bgColor,data){
     return      `
-        <button onclick="backPokemonCard(${data.id})" style="color:${bgColor}" type="button" class="btn"><i class="bi bi-arrow-left-circle icon"></i></button>
-        <button onclick="nextPokemonCard(${data.id})" style="color:${bgColor}" type="button" class="btn"><i class="bi bi-arrow-right-circle icon"></i></button>
+        <button onclick="backPokemonCard(${data.id})" style="color:${bgColor}; border:none" type="button" class="btn"><i class="bi bi-arrow-left-circle icon"></i></button>
+        <button onclick="nextPokemonCard(${data.id})" style="color:${bgColor}; border:none" type="button" class="btn"><i class="bi bi-arrow-right-circle icon"></i></button>
         `;
 }
 

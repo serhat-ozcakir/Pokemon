@@ -1,5 +1,5 @@
 let offset = 0;
-let limit = 40;
+let limit = 30;
 const pokemonCard = document.getElementById("pokemoncard");
 const loadingSpinner = document.getElementById('loading');
 const loadButton = document.getElementById('loadbutton');
@@ -9,6 +9,10 @@ const modalBodyInfo = document.getElementById('modal-body-info');
 const modalBodyID = document.getElementById('modalBodyID');
 const modalFooter = document.getElementById('modal-footer');
 let isLoading = false;
+let filteredList = [];
+let allPokemonList = [];
+let modalCurrentList = [];
+let modalCurrentIndex = [];
 
 async function init(){
     loadButton.style.display = 'none';
@@ -53,7 +57,7 @@ async function CacheData(url) {
 }
 
 async function PokemonListData(searchWord) {
-    const listUrl = searchWord ? "https://pokeapi.co/api/v2/pokemon?limit=500&offset=0" : 
+    const listUrl = searchWord ? "https://pokeapi.co/api/v2/pokemon?limit=400&offset=0" : 
     `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`;
     if (searchCache[listUrl]){
       return searchCache[listUrl];  
@@ -66,18 +70,37 @@ async function PokemonListData(searchWord) {
 }
 
 async function renderPokemonData(word = ""){
-    pokemonCard.innerHTML = "";
-    spinnerLoad();
     const searchWord = word ? word.trim().toLowerCase() : "";
     if (word){
         pokemonCard.innerHTML = "";
         offset = 0;}
         loadButton.style.display = searchWord ? "none" : "block";
         const list = await PokemonListData(searchWord);
-        const matchedPokemonList = filterPokemonName(list, searchWord);
+        const matchedPokemonList = filterPokemonName(list, searchWord).map(item=>{
+            const id = Number(item.url.split("pokemon/")[1].replace("/",""))
+            return {...item,id}})
+        filteredList = matchedPokemonList;
         await filterPokemonList(matchedPokemonList, pokemonCard);
-    if (!searchWord) offset += limit;
+        updateAllPokemonOrModalList(searchWord,matchedPokemonList)
+        if (!searchWord) offset += limit;
         await buttonDisplayControl(searchWord, matchedPokemonList.length > 0, pokemonCard);
+        hideSpinnerLoad()
+}
+
+function updateAllPokemonOrModalList(searchWord,matchedPokemonList){
+    if(!searchWord){
+            if(offset === 0){
+                allPokemonList = matchedPokemonList;
+            } else{
+                allPokemonList = allPokemonList.concat(matchedPokemonList)
+            }
+            modalCurrentList = allPokemonList;
+    } else{
+            modalCurrentList = filteredList;
+        }
+}
+
+function  hideSpinnerLoad(searchWord){
     if (searchWord) {setTimeout(() => diableSpinnerLoad(), 500);}
         else {diableSpinnerLoad();}
 }
@@ -115,11 +138,11 @@ function handleSearch(){
 const inputEl = document.getElementById('input');
 inputEl.addEventListener('input', () => {
     if (inputEl.value.trim() === "") {
+        pokemonCard.innerHTML = "";
+        offset = 0;
         renderPokemonData(null); 
     }
 });
-
-
 
 async function buttonDisplayControl(searchWord,foundPokemon,pokemonCard) {
     if (!foundPokemon) {
@@ -145,10 +168,13 @@ async function loadCard() {
     isLoading = true;
     loadButton.disabled = true;
     loadButton.textContent = "Loading...";
-    setTimeout(() => {
-        loadButton.disabled = false;
-        loadButton.textContent = "Load more..";
-    }, 2000);
+    if(allPokemonList.length > 150){
+        setTimeout(() => {
+            loadButton.disabled = false;
+            loadButton.textContent = "Load more..";}, 2500); }else{
+            setTimeout(() => {
+            loadButton.disabled = false;
+            loadButton.textContent = "Load more.."; }, 2000); }
     await renderPokemonData(); 
     isLoading = false;
 }
@@ -156,7 +182,12 @@ async function loadCard() {
 let modalShow = null;
 async function openDialog(id, bgColor) {
     if (!modalShow) modalShow = new bootstrap.Modal(modalElement, { backdrop: true, keyboard: true });
-    modalShow.show();
+        modalShow.show();
+    if(modalCurrentList.length === 0){
+        modalCurrentList = filteredList.length ? filteredList : allPokemonList;
+    }
+    modalCurrentIndex = modalCurrentList.findIndex(item => item.id === id);
+    if(modalCurrentIndex === -1) modalCurrentIndex = 0;
     const data = await CacheData(`https://pokeapi.co/api/v2/pokemon/${id}`);
     modalHeader.style.backgroundColor = bgColor;
     modalHeader.innerHTML = templateModalHeader(data);
@@ -181,20 +212,23 @@ async function modalShiniy(id){
     modalBodyID.innerHTML = templateModalShiny(data)
 }
 
-async function nextPokemonCard(id) {
-    let nextId = id + 1;
-       if (nextId >= 500){
-        nextId = 1;
+async function nextPokemonCard() {
+    modalCurrentIndex = modalCurrentIndex + 1;
+    if (modalCurrentIndex >= modalCurrentList.length) {
+        modalCurrentIndex = 0;
     }
-    const data = await CacheData(`https://pokeapi.co/api/v2/pokemon/${nextId}`);
-    openDialog(nextId, getColor(data.types[0].type.name)); 
+
+    const nextPokemon = modalCurrentList[modalCurrentIndex];
+    const nextData = await CacheData(nextPokemon.url);
+    openDialog(nextData.id, getColor(nextData.types[0].type.name));
 }
 
-async function backPokemonCard (id) {
-    let backId = id - 1; 
-    if (backId < 1){
-        backId = 500;
+async function backPokemonCard() {
+    modalCurrentIndex = modalCurrentIndex - 1;
+    if (modalCurrentIndex < 0) {
+        modalCurrentIndex = modalCurrentList.length - 1;
     }
-    const data = await CacheData(`https://pokeapi.co/api/v2/pokemon/${backId}`); 
-    openDialog(backId, getColor(data.types[0].type.name));
- }
+    const backPokemon = modalCurrentList[modalCurrentIndex];
+    const backData = await CacheData(backPokemon.url);
+    openDialog(backData.id, getColor(backData.types[0].type.name));
+}
